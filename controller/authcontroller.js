@@ -1,12 +1,6 @@
 import User from '../models/usermodel.js';
 import bcrypt from 'bcryptjs';
 
-
-// const comparePassword=async function (userPassword) {
-//     const isMatch = await bcrypt.compare(userPassword, this.password)
-//     return isMatch;
-// }
-
 export const registerController = async (req, res, next) => {
     try {
         const { name, email, password } = req.body
