@@ -4,9 +4,9 @@ import validator from 'validator';
 import JWT from 'jsonwebtoken';
 
 const userSchema = new mongoose.Schema({
-    name: {
+    username: {
         type: String,
-        required: [true, 'Name is required'],
+        required: [true, 'Username is required'],
     },
     email: {
         type: String,
@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     Quizzez: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Quiz',
+    }],
+
+    Attempts: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Attempt',
     }],
     role: {
         type: String,
@@ -39,8 +44,6 @@ userSchema.pre('save', async function () {
 
 // Instance method to compare passwords
 userSchema.methods.comparePassword = async function (userPassword) {
-    
-    
     return await bcrypt.compare(userPassword, this.password); // Compare using instance's password
 };
 
