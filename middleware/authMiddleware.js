@@ -1,3 +1,4 @@
+
 // authMiddleware.js
 import JWT from 'jsonwebtoken';
 

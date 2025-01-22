@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 import Quiz from "../models/quizmodel.js";
 import User from "../models/usermodel.js";
@@ -373,4 +374,3 @@ export const getAllQuizzes = async (req, res) => {
         
 //     }
 // }
-
