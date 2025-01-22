@@ -366,11 +366,11 @@ export const getAllQuizzes = async (req, res) => {
 
 //get all quiz
 
-export const getAllQuizzes_userSpecific = async (req, res) => {
-    try {
-        const quiz = await Quiz.
-    } catch (error) {
+// export const getAllQuizzes_userSpecific = async (req, res) => {
+//     try {
+//         const quiz = await Quiz.
+//     } catch (error) {
         
-    }
-}
+//     }
+// }
 
