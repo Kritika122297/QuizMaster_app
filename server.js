@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import 'express-async-errors';
 import cors from 'cors';
 import morgan from 'morgan';
+import multer from 'multer';
 
 //files import 
 import connectDB from './config/db.js';
@@ -23,6 +24,8 @@ connectDB();
 
 //rest object
 const app = express();
+
+// app.use(express.urlencoded({ extended: false}));
 
 //middlewares
 app.use(express.json());

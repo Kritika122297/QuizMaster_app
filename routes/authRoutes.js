@@ -12,4 +12,4 @@ router.post('/register', registerController)
 router.post('/login', loginController);
 
 //export 
-export default router
+export default router;
