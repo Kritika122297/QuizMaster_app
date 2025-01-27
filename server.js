@@ -35,8 +35,8 @@ app.use(morgan('dev'))
 
 
 //routes
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/auth", quizRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api", quizRoutes);
 
 //validation middleware
 app.use(errorMiddleware);
