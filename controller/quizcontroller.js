@@ -396,33 +396,33 @@ export const createAttempt = async (req, res) => {
         if (!quiz) return res.status(404).json({ message: "Quiz not found" });
 
 
-const uploadQuiz = async (req, res)=>{
-    try {
-        const {quiz} = req
-        if(!quiz || !quiz.title || !quiz.questions)
-            return res.status(400).json({message: "Invalid quiz data"})
-        const newQuiz = new Quiz({
-            title: quiz.title,
-            description: quiz.description || '',
-            questions: quiz.questions.map(question => ({
-                questionNumber: question.questionNumber,
-                question: question.question,
-                options: question.options,
-                answer: question.answer || 'a',
-                marks: 1 // Default marks for each question
-            })),
-            time: 240, // Default time
-            difficultyLevel: "Easy", // Default difficulty level
-            attemptedBy: []
-        })
-        const savedQuiz = await newQuiz.save()
-        const user = await User.findById(req.user._id)
-        if(!user)
-            return res.status(404).json({error: 'user not found'})
-        user.quizzesCreated.push(savedQuiz._id.toString())
-        await user.save()
-        res.status(200).json({message: "Quiz uploaded successfully"})
-    } catch (error) {
-        res.status(500).json({error: error.message})
-    }
-}
+// const uploadQuiz = async (req, res)=>{
+//     try {
+//         const {quiz} = req
+//         if(!quiz || !quiz.title || !quiz.questions)
+//             return res.status(400).json({message: "Invalid quiz data"})
+//         const newQuiz = new Quiz({
+//             title: quiz.title,
+//             description: quiz.description || '',
+//             questions: quiz.questions.map(question => ({
+//                 questionNumber: question.questionNumber,
+//                 question: question.question,
+//                 options: question.options,
+//                 answer: question.answer || 'a',
+//                 marks: 1 // Default marks for each question
+//             })),
+//             time: 240, // Default time
+//             difficultyLevel: "Easy", // Default difficulty level
+//             attemptedBy: []
+//         })
+//         const savedQuiz = await newQuiz.save()
+//         const user = await User.findById(req.user._id)
+//         if(!user)
+//             return res.status(404).json({error: 'user not found'})
+//         user.quizzesCreated.push(savedQuiz._id.toString())
+//         await user.save()
+//         res.status(200).json({message: "Quiz uploaded successfully"})
+//     } catch (error) {
+//         res.status(500).json({error: error.message})
+//     }
+// }
