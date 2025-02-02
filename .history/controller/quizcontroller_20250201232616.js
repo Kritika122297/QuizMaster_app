@@ -196,19 +196,14 @@ export const attempQuiz = async (req, res) => {
 
         let totalScore = 0;
 
-    attempts.questions = attempts.quiz.questions.map((question, i) => {
-        const selectedOption = answers[i];
-        const isCorrect = question.options.some(option => option.isCorrect && option.optionText === selectedOption);
-        const marks = isCorrect ? question.marks : 0;
-
-        totalScore += marks;
-        return { selectedOption, isCorrect, marks };
-    });
-        attempts.totalScore = totalScore;
-        await attempts.save();
-        res.status(200).json({ message: 'Question answered', score: attempts.score });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error', details: error.message });
-    }
-};
-
+        attempt.quiz.questions.forEach((question, index) => {
+            const isCorrect = question.options.some(option => option.isCorrect && option.optionText === answers[index]);
+            const marks = isCorrect ? question.marks : 0;
+        
+            totalScore += marks;
+            attempt.questions[index] = {
+                selectedOption: answers[index],
+                isCorrect,
+                marks
+            };
+        });

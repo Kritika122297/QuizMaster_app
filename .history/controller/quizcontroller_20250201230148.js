@@ -68,7 +68,7 @@ export const getAllQuizzes = async (req, res) => {
     }
 };
 
-export const getQuizzesByUser = async (req, res) => {
+const getQuizzesByUser = async (req, res) => {
     try {
         const UserId = req.user._id; 
         const quizzes = await Quiz.find({ createdBy: UserId }).populate("createdBy");
@@ -97,7 +97,7 @@ export const getQuizById = async (req, res) => {
     }
 };
 
-export const getAllPublicQuizzes = async (req, res)=>{
+const getAllPublicQuizzes = async (req, res)=>{
     try {
         const quizzes = await Quiz.find({Public: true}).populate('questions');
         if(!quizzes || quizzes.length === 0)
@@ -109,14 +109,14 @@ export const getAllPublicQuizzes = async (req, res)=>{
 };
 
 //attempts
-// export const createAttempt = async (req, res) => {
-//     try {
-//         const { quizId } = req.params;  
-//         const userId = req.user._id;  
+export const createAttempt = async (req, res) => {
+    try {
+        const { quizId } = req.params;  
+        const userId = req.user._id;  
 
         
-//         const quiz = await Quiz.findById(quizId);
-//         if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+        const quiz = await Quiz.findById(quizId);
+        if (!quiz) return res.status(404).json({ message: "Quiz not found" });
 
 
 // const uploadQuiz = async (req, res)=>{
@@ -165,50 +165,8 @@ export const attemptQuestion = async (req, res) => {
         const isCorrect = question.options.some(option => option.isCorrect && option.optionText === selectedOption);
 
         const Findquestion = attempt.questions.find(q => q.questionId.toString() === questionId);
-        if (Findquestion) {
+        if (question) {
             question.selectedOption = selectedOption;
             question.isCorrect = isCorrect;
             question.marks = isCorrect ? question.marks : 0;
         }
-
-        let totalScore = 0;
-        attempt.questions.forEach(q => totalScore += q.marks);
-        attempt.score = totalScore;
-
-        await attempt.save();
-
-        res.status(200).json({ message: 'Question answered', score: attempt.score });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error', details: error.message });
-    }
-};
-
-export const attempQuiz = async (req, res) => {
-    try {
-        const { answers } = req.body;
-        const { quizId } = req.params; 
-        if (!Array.isArray(answers)) {
-            return res.status(400).json({ error: "Answers array is required" });
-        }
-
-        const attempts = await attempts.findOne({ quiz: quizId, user: req.user._id }).populate('quiz');
-        if (!attempts) return res.status(404).json({ error: "Quiz attempt not found" });
-
-        let totalScore = 0;
-
-    attempts.questions = attempts.quiz.questions.map((question, i) => {
-        const selectedOption = answers[i];
-        const isCorrect = question.options.some(option => option.isCorrect && option.optionText === selectedOption);
-        const marks = isCorrect ? question.marks : 0;
-
-        totalScore += marks;
-        return { selectedOption, isCorrect, marks };
-    });
-        attempts.totalScore = totalScore;
-        await attempts.save();
-        res.status(200).json({ message: 'Question answered', score: attempts.score });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error', details: error.message });
-    }
-};
-

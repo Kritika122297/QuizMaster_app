@@ -203,12 +203,6 @@ export const attempQuiz = async (req, res) => {
 
         totalScore += marks;
         return { selectedOption, isCorrect, marks };
-    });
         attempts.totalScore = totalScore;
-        await attempts.save();
-        res.status(200).json({ message: 'Question answered', score: attempts.score });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error', details: error.message });
-    }
-};
-
+});
+});

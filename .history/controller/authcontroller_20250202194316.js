@@ -28,6 +28,7 @@ export const registerController = async (req, res, next) => {
         user: {
             name: user.name,
             email: user.email,
+            location: user.location
         },
         token
     })
