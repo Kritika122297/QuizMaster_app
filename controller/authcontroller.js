@@ -2,60 +2,76 @@
 import userModel from "../models/usermodel.js";
 import validator from 'validator';
 
+
 export const registerController = async (req, res, next) => {
-    const { name, email, password } = req.body
-    validator
-    if (!name) {
-        next("name is required");
-    }
-    if (!email) {
-        next("email is required");
-    }
-    if (!password) {
-        next("password is required");
-    }
-    const existingUser = await userModel.findOne({ email })
-    if (existingUser) {
-        next('Eamil Already Register Please Login');
+    try {
+        const { username, email, password } = req.body;
 
-    }
-    const user = await userModel.create({ name, email, password })
-    //token 
-    const token = user.createJWT()
-    res.status(201).send({
-        success: true,
-        message: 'User Created Successfully',
-        user: {
-            name: user.name,
-            email: user.email,
-        },
-        token
-    })
+        // Validation
+        if (!username) return next("Username is required");
+        if (!email) return next("Email is required");
+        if (!password) return next("Password is required");
 
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) return next("Email already registered. Please log in.");
+
+        const user = await userModel.create({ username, email, password });
+
+        const token = user.createJWT();
+
+        res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            user: {
+                username: user.username,
+                email: user.email,
+            },
+            token,
+        });
+
+    } catch (error) {
+        next(error); 
+    }
 };
+
 
 export const loginController = async (req, res, next) => {
-    const { email, password } = req.body
-    //validation
-    if (!email || !password) {
-        next('Please Provide the require Fields')
+    try {
+        const { email, password } = req.body;
+        
+        // Validation
+        if (!email || !password) return next("Please provide the required fields");
+
+        const user = await userModel.findOne({ email }).select("+password");
+        if (!user) return next("Invalid username or password");
+
+        if (!user || !(await user.comparePassword(password))) {
+            return next("Invalid username or password");
+        }
+
+        user.password = undefined;
+
+        const token = user.createJWT();
+
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            user,
+            token,
+        });
+
+    } catch (error) {
+        return next(error);
     }
-    //find user by email
-    const user = await userModel.findOne({ email }).select("+password");
-    if (!user) {
-        next('Invalid Username or Password')
-    }
-    //compare password
-    const isMatch = await user.comparePassword(password)
-    if (!isMatch) {
-        next('Invalid Username or Password')
-    }
-    user.password = undefined;
-    const token = user.createJWT()
-    res.status(200).json({
-        success: true,
-        message: 'Login Successfully',
-        user,
-        token,
-    });
 };
+
+
+export const logoutController = async (req, res)=>{
+    try {
+        res.clearCookie('token')
+        res.status(200).json({message: 'Logged out successfully'})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+};
+

@@ -2,21 +2,30 @@
 import mongoose from "mongoose";
 import Quiz from "../models/quizmodel.js";
 import User from "../models/usermodel.js";
-import attemptmodel from "../models/attemptmodel.js";
 
-
-export const createQuiz = async (req, res) =>{
+export const createQuiz = async (req, res) => {
     try {
-        const {title, description, questions, totalmarks} = req.body;
-        const createdBy = req.user.id;
-
-        const quiz = new Quiz({title, description, questions, totalmarks, createdBy});
+        const { title, description, questions } = req.body;
+        const createdBy = req.user.id; 
+        if (!title || !questions || questions.length === 0 || !createdBy) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Title, questions, and createdBy are required!" 
+            });
+        }
+        const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+        const quiz = new Quiz({ title, description, questions, totalMarks, createdBy });
 
         await quiz.save();
-        res.status(201).json({ message: "Quiz created successfully", quiz});
+        res.status(201).json({ 
+            success: true, 
+            message: "Quiz created successfully!", 
+            quiz 
+        });
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({message: "Failed to create quiz"});
+        console.error("Error creating quiz:", error);
+        res.status(500).json({ success: false, message: "Failed to create quiz", error: error.message });
     }
 };
 
@@ -149,11 +158,43 @@ export const getAllPublicQuizzes = async (req, res)=>{
 //         res.status(500).json({error: error.message})
 //     }
 // }
+const uploadQuiz = async (req, res)=>{
+    try {
+        const {quiz} = req
+        if(!quiz || !quiz.title || !quiz.questions)
+            return res.status(400).json({message: "Invalid quiz data"})
+        const newQuiz = new Quiz({
+            title: quiz.title,
+            description: quiz.description || '',
+            questions: quiz.questions.map(question => ({
+                questionNumber: question.questionNumber,
+                question: question.question,
+                options: question.options,
+                answer: question.answer || 'a',
+                marks: 1 // Default marks for each question
+            })),
+            time: 240, // Default time
+            difficultyLevel: "Easy", // Default difficulty level
+            attemptedBy: []
+        })
+        const savedQuiz = await newQuiz.save()
+        const user = await User.findById(req.user._id)
+        if(!user)
+            return res.status(404).json({error: 'user not found'})
+        user.quizzesCreated.push(savedQuiz._id.toString())
+        await user.save()
+        res.status(200).json({message: "Quiz uploaded successfully"})
+    } catch (error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
 
 export const attemptQuestion = async (req, res) => {
     try {
         const { selectedOption } = req.body;
-        const { quizId, questionId } = req.params; // Get quizId and questionId from URL params
+        const { quizId, questionId } = req.params; 
+
         if (!selectedOption) {
             return res.status(400).json({ error: "Selected option is required" });
         }
@@ -212,3 +253,18 @@ export const attempQuiz = async (req, res) => {
     }
 };
 
+export const reviewAttempts = (req, res) => {
+    try {
+        const { userId } = req.params;
+        const attempts = attempts(userId);
+
+        if (!attempts.length) {
+            return res.status(404).json({ message: "No attempts found" });
+        }
+
+        res.json({ attempts });
+    } catch (error) {
+        console.error("Error fetching attempts:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
