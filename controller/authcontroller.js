@@ -3,6 +3,7 @@ import userModel from "../models/usermodel.js";
 import validator from 'validator';
 
 
+
 export const registerController = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
@@ -43,10 +44,8 @@ export const loginController = async (req, res, next) => {
         if (!email || !password) return next("Please provide the required fields");
 
         const user = await userModel.findOne({ email }).select("+password");
-        if (!user) return next("Invalid username or password");
-
         if (!user || !(await user.comparePassword(password))) {
-            return next("Invalid username or password");
+            return res.status(401).json({ success: false, error: "Invalid username or password" });
         }
 
         user.password = undefined;
@@ -74,4 +73,3 @@ export const logoutController = async (req, res)=>{
         res.status(500).json({error: error.message})
     }
 };
-

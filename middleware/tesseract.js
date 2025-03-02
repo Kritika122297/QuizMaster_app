@@ -1,14 +1,21 @@
 import tesseract from "tesseract.js";
 
-export const uploadAndOcr = async (req, res, next)=>{
+export const uploadAndOcr = async (req, res, next) => {
     try {
-        const fileUrl = req.fileUrl
-        console.log(`Uploaded File URL: ${fileUrl}`);
-        const { data: { text } } = await tesseract.recognize(fileUrl, 'eng');
-        console.log(`Recognized Text: ${text}`);
-        req.recognizedText = text
-        next()
+        if (!req.fileUrl) {
+            return res.status(400).json({ error: "File URL not found for OCR processing" });
+        }
+
+        console.log("OCR Processing File:", req.fileUrl);
+
+        const { data: { text } } = await tesseract.recognize(req.fileUrl, "eng");
+
+        console.log("Extracted OCR Text:", text);
+
+        req.recognizedText = text;
+        next();
     } catch (error) {
-        res.status(500).json({error: error.message})
+        console.error("OCR Error:", error);
+        res.status(500).json({ error: "Failed to process OCR", details: error.message });
     }
 };

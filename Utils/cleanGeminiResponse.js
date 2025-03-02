@@ -1,10 +1,10 @@
-const cleanGeminiResponse = (response) => {
-    const withoutMarkdown = response.replace(/```json/g, '').replace(/```/g, '').trim();
-    const jsonStartIndex = withoutMarkdown.indexOf('{');
-    const jsonEndIndex = withoutMarkdown.lastIndexOf('}') + 1;
-    if (jsonStartIndex === -1 || jsonEndIndex === -1)
-        throw new Error('Invalid JSON response from Gemini');
-    return withoutMarkdown.substring(jsonStartIndex, jsonEndIndex);
+const cleanGeminiResponse = (responseText) => {
+    let cleanedResponse = responseText.replace(/```.*?```/gs, '').replace(/`/g, '');
+    if (cleanedResponse.trim().startsWith("{") && cleanedResponse.trim().endsWith("}")) {
+        return cleanedResponse;
+    }
+    console.error("Invalid Gemini AI Response:", cleanedResponse);
+    return '{"title": "Undefined", "description": "Invalid response from Gemini", "questions": []}';
 };
 
-export {cleanGeminiResponse}
+export { cleanGeminiResponse };

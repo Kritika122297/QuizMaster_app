@@ -158,7 +158,7 @@ export const getAllPublicQuizzes = async (req, res)=>{
 //         res.status(500).json({error: error.message})
 //     }
 // }
-const uploadQuiz = async (req, res)=>{
+export const uploadQuiz = async (req, res)=>{
     try {
         const {quiz} = req
         if(!quiz || !quiz.title || !quiz.questions)

@@ -13,6 +13,31 @@ export const getUserProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const getCurrentUser = async (req, res) => {
+    try {
+        console.log("Authenticated User ID:", req.user?.userId);
+        
+        if (!User) {
+            console.error("userModel is not defined!");
+            return res.status(500).json({ success: false, error: "Server error" });
+        }
+
+        const user = await User.findById(req.user.userId).select("-password");
+        if (!user) {
+            console.log("User not found in DB");
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        console.log("User found:", user);
+        return res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+  
  
 
 export const updateUser = async (req, res)=>{

@@ -1,6 +1,7 @@
 import express from 'express';
 import { loginController, registerController, logoutController } from '../controller/authcontroller.js';
 
+
 const router = express.Router()
 
 
@@ -10,6 +11,7 @@ router.post('/register', registerController)
 // LOGIN || POST
 router.post('/login', loginController);
 router.post('/logout', logoutController);
+
 
 
 //export 
