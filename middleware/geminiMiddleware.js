@@ -39,8 +39,8 @@ const geminiApi = async (req, res, next) => {
 
         // Try parsing the cleaned response as JSON
         try {
-            req.quizData = JSON.parse(cleanedResponse);
-            next();
+          req.quizData = cleanedResponse;
+          next();
         } catch (jsonError) {
             return res.status(500).json({ error: 'Failed to parse generated JSON', details: jsonError.message });
         }
