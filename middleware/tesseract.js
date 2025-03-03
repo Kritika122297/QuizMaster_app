@@ -1,18 +1,47 @@
 import tesseract from "tesseract.js";
+import pdfPoppler from "pdf-poppler";
+import path from "path";
+import fs from "fs";
 
 export const uploadAndOcr = async (req, res, next) => {
     try {
-        if (!req.fileUrl) {
-            return res.status(400).json({ error: "File URL not found for OCR processing" });
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
         }
 
-        console.log("OCR Processing File:", req.fileUrl);
+        const filePath = req.file.path;
+        console.log("OCR Processing File:", filePath);
 
-        const { data: { text } } = await tesseract.recognize(req.fileUrl, "eng");
+        let extractedText = "";
 
-        console.log("Extracted OCR Text:", text);
+        if (req.file.mimetype === "application/pdf") {
+            // Convert PDF to Image
+            const imageDir = "./public/temp/pdf_images";
+            if (!fs.existsSync(imageDir)) {
+                fs.mkdirSync(imageDir, { recursive: true });
+            }
 
-        req.recognizedText = text;
+            const imagePath = path.join(imageDir, `${Date.now()}.png`);
+            const options = { format: "png", out_dir: imageDir, out_prefix: "pdf_page", page: 1 };
+
+            await pdfPoppler.convert(filePath, options);
+            const convertedImages = fs.readdirSync(imageDir).map(file => path.join(imageDir, file));
+
+            // Process each image with OCR
+            for (const img of convertedImages) {
+                const { data: { text } } = await tesseract.recognize(img, "eng");
+                extractedText += text + "\n";
+                fs.unlinkSync(img); // Clean up image
+            }
+        } else {
+            // Process Image (JPEG/PNG)
+            const { data: { text } } = await tesseract.recognize(filePath, "eng");
+            extractedText = text;
+        }
+
+        console.log("Extracted OCR Text:", extractedText);
+
+        req.recognizedText = extractedText;
         next();
     } catch (error) {
         console.error("OCR Error:", error);
